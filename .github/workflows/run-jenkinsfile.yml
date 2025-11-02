@@ -1,0 +1,38 @@
+name: Run Jenkinsfile (Jenkinsfile Runner)
+
+on:
+  workflow_dispatch:
+    inputs:
+      NAME:
+        description: "NAME parameter for Jenkinsfile"
+        required: false
+        default: "World"
+      DO_BUILD:
+        description: "Run Build stage? (true/false)"
+        required: false
+        default: "true"
+
+jobs:
+  run-jenkinsfile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Run the Jenkinsfile headlessly (no Jenkins server needed)
+      - name: Execute Jenkinsfile via Jenkinsfile Runner
+        uses: jenkinsci/jenkinsfile-runner-github-actions/jenkinsfile-runner-prepackaged@v0.2
+        env:
+          # Pass inputs as env so your Jenkinsfile can read them if params are absent
+          NAME: ${{ github.event.inputs.NAME || 'World' }}
+          DO_BUILD: ${{ github.event.inputs.DO_BUILD || 'true' }}
+
+      # Optional: upload files your Jenkinsfile creates (build outputs, junit xml)
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: jenkinsfile-outputs
+          path: |
+            build/**
+            reports/junit/*.xml
+          if-no-files-found: ignore
