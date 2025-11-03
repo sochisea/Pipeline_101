@@ -226,4 +226,114 @@ Done ✅
 | **catchError**          | Force pipeline to finish as SUCCESS           |
 
 
+Let’s walk through the quiz together clearly and simply.
+
+---
+
+### 🧩 1️⃣ What’s the difference between a **stage** and a **step**?
+
+| Concept   | What it means                                                                                                                                                      | Example                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| **Stage** | A **section** or **phase** of your pipeline — like a chapter in your automation flow. Used for organizing, visualization, and control (e.g., Build, Test, Deploy). | `stage('Build') { steps { ... } }`                    |
+| **Step**  | A **single action** inside a stage — an instruction Jenkins actually executes.                                                                                     | `sh 'echo "Compiling..."'` or `junit 'reports/*.xml'` |
+
+🧠 Analogy:
+
+* **Stage** = a box in your flow diagram.
+* **Steps** = the instructions *inside* that box.
+
+---
+
+### 🧩 2️⃣ What does the **`parallel { … }`** block do?
+
+The `parallel` block tells Jenkins:
+
+> “Run these multiple sub-stages **at the same time** instead of one after another.”
+
+Example from Level 2:
+
+```groovy
+stage('Test (parallel)') {
+  parallel {
+    stage('Unit Tests') { ... }
+    stage('Integration Tests') { ... }
+  }
+}
+```
+
+🧠 Why it’s powerful:
+
+* Saves time — if both tests take 5 minutes, parallelization still finishes in 5 min, not 10.
+* Jenkins displays each branch separately in the UI.
+
+---
+
+### 🧩 3️⃣ How would you change the pipeline to **skip Build for `dev`** but **require it for `staging`/`prod`**?
+
+Use a **`when` condition** that checks the environment variable:
+
+```groovy
+stage('Build') {
+  when {
+    expression { return params.DO_BUILD && env.APP_ENV != 'dev' }
+  }
+  steps {
+    sh '''
+      echo "Building for ${APP_ENV}..."
+      echo "Build OK"
+    '''
+  }
+}
+```
+
+🧠 Explanation:
+
+* The stage only runs if `DO_BUILD == true` **and** the environment is **not** dev.
+* For `staging` or `prod`, `APP_ENV != 'dev'`, so it builds.
+* For `dev`, it skips automatically.
+
+---
+
+### 🧩 4️⃣ Where do your **artifacts** live after the run (and how do you download them)?
+
+In **GitHub Actions**, after each run:
+
+* The Jenkinsfile creates files (like `dist/app-staging.tar.gz`, `reports/junit/*.xml`) inside the workspace.
+* Your GitHub workflow step:
+
+  ```yaml
+  - name: Upload outputs
+    uses: actions/upload-artifact@v4
+    with:
+      name: jenkinsfile-outputs
+      path: |
+        build/**
+        reports/junit/*.xml
+        dist/**
+  ```
+
+  uploads those files as **artifacts** attached to the run.
+
+🧾 To download:
+
+1. Go to **Actions → the run you executed.**
+2. On the right side or bottom, find **Artifacts**.
+3. Click the name (e.g., `jenkinsfile-outputs`) → it downloads as a `.zip`.
+4. Inside, you’ll see `build/`, `reports/`, and `dist/` folders.
+
+✅ Those files are your **hand-off deliverables** — what a real Jenkins would deploy or share.
+
+---
+
+### 🌟 Summary
+
+| Concept               | Key takeaway                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| **Stage vs Step**     | Stages organize your flow; steps are the commands inside them.                           |
+| **Parallel block**    | Runs multiple mini-stages at once to save time.                                          |
+| **Conditional Build** | Use `when { expression { ... } }` with environment variables to control stage execution. |
+| **Artifacts**         | Stored and downloadable from GitHub Actions → “Artifacts” section on the run page.       |
+
+
+
 
