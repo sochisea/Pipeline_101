@@ -8,6 +8,7 @@ Think of it like a *recipe* for automation — Jenkins is the cook, and your Jen
 
 In your case, it runs **three stages** (Init → Build → Test).
 Each stage contains **steps**, which are individual shell commands or Jenkins functions.
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/ac730d92-80a1-40f5-b010-3a0b1ca215c5" />
 
 ---
 
