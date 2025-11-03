@@ -334,6 +334,120 @@ In **GitHub Actions**, after each run:
 | **Conditional Build** | Use `when { expression { ... } }` with environment variables to control stage execution. |
 | **Artifacts**         | Stored and downloadable from GitHub Actions → “Artifacts” section on the run page.       |
 
+---
+
+## 🧩 What are **artifacts** in CI/CD?
+
+> **Artifacts = the files your pipeline produces and wants to keep after it finishes.**
+
+They are **outputs** — the *results* of your build, test, or packaging stages.
+
+---
+
+### 🧱 Think of it like this:
+
+When you build something (an app, a report, or even a zip file),
+the CI system (like Jenkins or GitHub Actions) runs on a temporary machine.
+
+After the job ends, that machine is deleted 🚮 — unless you tell the system:
+
+> “Hey! Save these files somewhere safe — I’ll need them later.”
+
+Those saved files are called **artifacts**.
+
+---
+
+## 📦 Example in your Level 2 pipeline
+
+Your Jenkinsfile creates these folders and files:
+
+```
+build/
+  ├─ app.bin
+  ├─ config.env
+reports/junit/
+  ├─ unit.xml
+  ├─ integration.xml
+dist/
+  ├─ app-dev.tar.gz
+```
+
+These are the **artifacts** of your run:
+
+* The compiled binary → `app.bin`
+* The environment config → `config.env`
+* The test reports → `.xml` files
+* The packaged release → `app-dev.tar.gz`
+
+They’re valuable because:
+
+* You might want to **download them** and test locally.
+* A next pipeline (e.g., “Deploy”) might need them.
+* They’re **proof** your build really produced something.
+
+---
+
+## 🧭 Where artifacts live (in GitHub Actions)
+
+In your workflow YAML, you have this step:
+
+```yaml
+- name: Upload outputs
+  uses: actions/upload-artifact@v4
+  with:
+    name: jenkinsfile-outputs
+    path: |
+      build/**
+      reports/junit/*.xml
+      dist/**
+```
+
+That command tells GitHub Actions:
+
+> “Take all files inside `build/`, `reports/junit/`, and `dist/`, and upload them as a downloadable package named `jenkinsfile-outputs`.”
+
+---
+
+## 💻 How to view them
+
+1. Go to your **GitHub repository → Actions → last run**.
+
+2. Scroll to the **bottom right corner** of the run summary.
+   You’ll see something like:
+
+   📦 **Artifacts**
+   → `jenkinsfile-outputs` (download)
+
+3. Click it — it downloads as a ZIP file.
+
+4. Unzip it locally, and you’ll see all those files your pipeline created.
+
+That ZIP = **your artifacts**.
+
+---
+
+## 🧠 Why artifacts matter in DevOps
+
+| Situation           | Artifact Example          | Purpose                                |
+| ------------------- | ------------------------- | -------------------------------------- |
+| Building an app     | `.exe`, `.jar`, `.tar.gz` | To deploy or share the build           |
+| Running tests       | `.xml` JUnit reports      | To show test results in Jenkins/GitHub |
+| Creating docs       | `.pdf`, `.html`           | To publish docs                        |
+| Infrastructure runs | `.tfplan`, `.json`        | To preview changes before applying     |
+| Data jobs           | `.csv`, `.json`           | To store processed data results        |
+
+Artifacts = the **bridge between stages** in your CI/CD flow:
+
+* Build → Test → Deploy → Release
+  Each stage can take the artifact from the previous one.
+
+---
+
+## 🧩 In one sentence
+
+> 🗂️ **Artifacts are the “take-home results” of your automation — files saved from your temporary build environment so you or the next stage can use them later.**
+
+
 
 
 
